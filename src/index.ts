@@ -8,7 +8,6 @@ import { CharactersCollection } from "./CharactersCollection";
 // console.log(numbersCollection);
 
 const charactersCollection = new CharactersCollection("iHPkdf");
-
 const sorter = new Sorter(charactersCollection);
 sorter.sort();
 console.log(charactersCollection);
