@@ -4,15 +4,6 @@ import { MatchResult } from "./MatchResult";
 const reader = new CsvFileReader("football.csv");
 reader.read();
 
-console.log(reader.read());
-
-// const printMachResult = (): MatchResult => {
-//     if (match[5] === 'H') {
-//         return MatchResult.HomeWin;
-//     }
-//     return MatchResult.AwayWin;
-// }
-
 let manUnitedWins = 0;
 
 for (let match of reader.data) {
