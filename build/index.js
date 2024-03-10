@@ -1,32 +1,23 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs_1 = __importDefault(require("fs"));
-const matches = fs_1.default
-    .readFileSync("football.csv", {
-    encoding: "utf-8",
-})
-    .split("\n")
-    .map((row) => {
-    return row.split(",");
-});
+const CsvFileReader_1 = require("./CsvFileReader");
+const reader = new CsvFileReader_1.CsvFileReader("football.csv");
+reader.read();
 // enum - enumeration
 var MatchResult;
 (function (MatchResult) {
     MatchResult["HomeWin"] = "H";
-    MatchResult["AwayWin"] = "W";
+    MatchResult["AwayWin"] = "A";
     MatchResult["Draw"] = "D";
 })(MatchResult || (MatchResult = {}));
 // const printMachResult = (): MatchResult => {
 //     if (match[5] === 'H') {
 //         return MatchResult.HomeWin;
-//     } 
+//     }
 //     return MatchResult.AwayWin;
 // }
 let manUnitedWins = 0;
-for (let match of matches) {
+for (let match of reader.data) {
     if (match[1] === "Man United" && match[5] === MatchResult.HomeWin) {
         manUnitedWins++;
     }
