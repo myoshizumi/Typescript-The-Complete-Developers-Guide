@@ -3,13 +3,14 @@ import { CsvFileReader } from "./CsvFileReader";
 const reader = new CsvFileReader("football.csv");
 reader.read();
 
+console.log(reader.read());
+
 // enum - enumeration
 enum MatchResult {
 	HomeWin = "H",
 	AwayWin = "A",
 	Draw = "D",
 }
-
 // const printMachResult = (): MatchResult => {
 //     if (match[5] === 'H') {
 //         return MatchResult.HomeWin;
