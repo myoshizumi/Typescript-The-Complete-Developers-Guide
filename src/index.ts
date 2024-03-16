@@ -1,7 +1,6 @@
-import { MatchReader } from "./MatchReader";
-import { Summary } from "./Summary";
+import { User } from "./models/User";
 
-const matchReader = MatchReader.fromCsv("football.csv");
-const summary = Summary.winsAnalysisWithHtmlReport("Man United");
-matchReader.load();
-summary.buildAndPrintReport(matchReader.matches);
+const user = new User({ name: "myname", age: 20 });
+
+console.log(user.get("name"));
+console.log(user.get("age"));
