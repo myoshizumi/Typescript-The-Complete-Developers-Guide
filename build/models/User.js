@@ -12,6 +12,10 @@ class User {
     set(update) {
         Object.assign(this.data, update);
     }
-    on(eventName, callback) { }
+    on(eventName, callback) {
+        const handlers = this.events[eventName] || []; // Callback[] or undefined
+        handlers.push(callback);
+        this.events[eventName] = handlers;
+    }
 }
 exports.User = User;
