@@ -4,6 +4,7 @@ exports.User = void 0;
 class User {
     constructor(data) {
         this.data = data;
+        this.events = {};
     }
     get(propName) {
         return this.data[propName];
