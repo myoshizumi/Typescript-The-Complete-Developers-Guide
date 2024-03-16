@@ -8,5 +8,8 @@ class User {
     get(propName) {
         return this.data[propName];
     }
+    set(update) {
+        Object.assign(this.data, update);
+    }
 }
 exports.User = User;
