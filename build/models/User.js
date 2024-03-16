@@ -11,5 +11,6 @@ class User {
     set(update) {
         Object.assign(this.data, update);
     }
+    on(eventName, callback) { }
 }
 exports.User = User;
