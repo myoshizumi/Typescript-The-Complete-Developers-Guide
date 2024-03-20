@@ -128,8 +128,18 @@ var UserForm = /** @class */function () {
   function UserForm(parent) {
     this.parent = parent;
   }
+  UserForm.prototype.eventsMap = function () {
+    return {
+      "click:button": this.onButtonClick
+      // 'hover:h1': this.onHoverHeader,
+      // 'drag:div': this.onDragDiv
+    };
+  };
+  UserForm.prototype.onButtonClick = function () {
+    console.log("hi there");
+  };
   UserForm.prototype.template = function () {
-    return /*html*/"\n            <div>\n                <h1>User Form</h1>\n                <input />\n            </div>\n        ";
+    return /*html*/"\n            <div>\n                <h1>User Form</h1>\n                <input />\n                <button>Click Me</button>\n            </div>\n        ";
   };
   UserForm.prototype.render = function () {
     var templateElement = document.createElement("template");
