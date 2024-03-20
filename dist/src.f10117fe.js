@@ -5553,6 +5553,10 @@ var User = /** @class */function () {
     enumerable: false,
     configurable: true
   });
+  User.prototype.set = function (update) {
+    this.attributes.set(update);
+    this.events.trigger("change");
+  };
   return User;
 }();
 exports.User = User;
@@ -5569,9 +5573,11 @@ var user = new User_1.User({
 });
 console.log(user.get("name"));
 user.on("change", function () {
-  console.log("User was changed");
+  console.log("User was changed, We probably need to updatte some HTML.");
 });
-user.trigger("change");
+user.set({
+  name: "New Name"
+});
 },{"./models/User":"src/models/User.ts"}],"../../../.nodebrew/node/v20.10.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
