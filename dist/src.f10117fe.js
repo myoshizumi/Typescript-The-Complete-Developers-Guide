@@ -126,22 +126,23 @@ Object.defineProperty(exports, "__esModule", {
 exports.Eventing = void 0;
 var Eventing = /** @class */function () {
   function Eventing() {
+    var _this = this;
     this.events = {};
+    this.on = function (eventName, callback) {
+      var handlers = _this.events[eventName] || [];
+      handlers.push(callback);
+      _this.events[eventName] = handlers;
+    };
+    this.trigger = function (eventName) {
+      var handlers = _this.events[eventName];
+      if (!handlers || handlers.length === 0) {
+        return;
+      }
+      handlers.forEach(function (callback) {
+        callback();
+      });
+    };
   }
-  Eventing.prototype.on = function (eventName, callback) {
-    var handlers = this.events[eventName] || [];
-    handlers.push(callback);
-    this.events[eventName] = handlers;
-  };
-  Eventing.prototype.trigger = function (eventName) {
-    var handlers = this.events[eventName];
-    if (!handlers || handlers.length === 0) {
-      return;
-    }
-    handlers.forEach(function (callback) {
-      callback();
-    });
-  };
   return Eventing;
 }();
 exports.Eventing = Eventing;
@@ -689,8 +690,9 @@ const reduceDescriptors = (obj, reducer) => {
   const descriptors = Object.getOwnPropertyDescriptors(obj);
   const reducedDescriptors = {};
   forEach(descriptors, (descriptor, name) => {
-    if (reducer(descriptor, name, obj) !== false) {
-      reducedDescriptors[name] = descriptor;
+    let ret;
+    if ((ret = reducer(descriptor, name, obj)) !== false) {
+      reducedDescriptors[name] = ret || descriptor;
     }
   });
   Object.defineProperties(obj, reducedDescriptors);
@@ -786,6 +788,8 @@ const toJSONObject = obj => {
   };
   return visit(obj, 0);
 };
+const isAsyncFn = kindOfTest('AsyncFunction');
+const isThenable = thing => thing && (isObject(thing) || isFunction(thing)) && isFunction(thing.then) && isFunction(thing.catch);
 var _default = exports.default = {
   isArray,
   isArrayBuffer,
@@ -836,7 +840,9 @@ var _default = exports.default = {
   ALPHABET,
   generateString,
   isSpecCompliantForm,
-  toJSONObject
+  toJSONObject,
+  isAsyncFn,
+  isThenable
 };
 },{"./helpers/bind.js":"node_modules/axios/lib/helpers/bind.js"}],"node_modules/axios/lib/core/AxiosError.js":[function(require,module,exports) {
 'use strict';
@@ -3398,6 +3404,24 @@ var _URLSearchParams = _interopRequireDefault(require("./classes/URLSearchParams
 var _FormData = _interopRequireDefault(require("./classes/FormData.js"));
 var _Blob = _interopRequireDefault(require("./classes/Blob.js"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _default = exports.default = {
+  isBrowser: true,
+  classes: {
+    URLSearchParams: _URLSearchParams.default,
+    FormData: _FormData.default,
+    Blob: _Blob.default
+  },
+  protocols: ['http', 'https', 'file', 'blob', 'url', 'data']
+};
+},{"./classes/URLSearchParams.js":"node_modules/axios/lib/platform/browser/classes/URLSearchParams.js","./classes/FormData.js":"node_modules/axios/lib/platform/browser/classes/FormData.js","./classes/Blob.js":"node_modules/axios/lib/platform/browser/classes/Blob.js"}],"node_modules/axios/lib/platform/common/utils.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.hasStandardBrowserWebWorkerEnv = exports.hasStandardBrowserEnv = exports.hasBrowserEnv = void 0;
+const hasBrowserEnv = exports.hasBrowserEnv = typeof window !== 'undefined' && typeof document !== 'undefined';
+
 /**
  * Determine if we're running in a standard browser environment
  *
@@ -3415,13 +3439,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  *
  * @returns {boolean}
  */
-const isStandardBrowserEnv = (() => {
-  let product;
-  if (typeof navigator !== 'undefined' && ((product = navigator.product) === 'ReactNative' || product === 'NativeScript' || product === 'NS')) {
-    return false;
-  }
-  return typeof window !== 'undefined' && typeof document !== 'undefined';
-})();
+const hasStandardBrowserEnv = exports.hasStandardBrowserEnv = (product => {
+  return hasBrowserEnv && ['ReactNative', 'NativeScript', 'NS'].indexOf(product) < 0;
+})(typeof navigator !== 'undefined' && navigator.product);
 
 /**
  * Determine if we're running in a standard browser webWorker environment
@@ -3432,37 +3452,28 @@ const isStandardBrowserEnv = (() => {
  * `typeof window !== 'undefined' && typeof document !== 'undefined'`.
  * This leads to a problem when axios post `FormData` in webWorker
  */
-const isStandardBrowserWebWorkerEnv = (() => {
+const hasStandardBrowserWebWorkerEnv = exports.hasStandardBrowserWebWorkerEnv = (() => {
   return typeof WorkerGlobalScope !== 'undefined' &&
   // eslint-disable-next-line no-undef
   self instanceof WorkerGlobalScope && typeof self.importScripts === 'function';
 })();
-var _default = exports.default = {
-  isBrowser: true,
-  classes: {
-    URLSearchParams: _URLSearchParams.default,
-    FormData: _FormData.default,
-    Blob: _Blob.default
-  },
-  isStandardBrowserEnv,
-  isStandardBrowserWebWorkerEnv,
-  protocols: ['http', 'https', 'file', 'blob', 'url', 'data']
-};
-},{"./classes/URLSearchParams.js":"node_modules/axios/lib/platform/browser/classes/URLSearchParams.js","./classes/FormData.js":"node_modules/axios/lib/platform/browser/classes/FormData.js","./classes/Blob.js":"node_modules/axios/lib/platform/browser/classes/Blob.js"}],"node_modules/axios/lib/platform/index.js":[function(require,module,exports) {
+},{}],"node_modules/axios/lib/platform/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-Object.defineProperty(exports, "default", {
-  enumerable: true,
-  get: function () {
-    return _index.default;
-  }
-});
+exports.default = void 0;
 var _index = _interopRequireDefault(require("./node/index.js"));
+var utils = _interopRequireWildcard(require("./common/utils.js"));
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./node/index.js":"node_modules/axios/lib/platform/browser/index.js"}],"node_modules/axios/lib/helpers/toURLEncodedForm.js":[function(require,module,exports) {
+var _default = exports.default = {
+  ...utils,
+  ..._index.default
+};
+},{"./node/index.js":"node_modules/axios/lib/platform/browser/index.js","./common/utils.js":"node_modules/axios/lib/platform/common/utils.js"}],"node_modules/axios/lib/helpers/toURLEncodedForm.js":[function(require,module,exports) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3540,6 +3551,7 @@ function arrayToObject(arr) {
 function formDataToJSON(formData) {
   function buildPath(path, value, target, index) {
     let name = path[index++];
+    if (name === '__proto__') return true;
     const isNumericKey = Number.isFinite(+name);
     const isLast = index >= path.length;
     name = !name && _utils.default.isArray(target) ? target.length : name;
@@ -3585,10 +3597,6 @@ var _toURLEncodedForm = _interopRequireDefault(require("../helpers/toURLEncodedF
 var _index = _interopRequireDefault(require("../platform/index.js"));
 var _formDataToJSON = _interopRequireDefault(require("../helpers/formDataToJSON.js"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-const DEFAULT_CONTENT_TYPE = {
-  'Content-Type': undefined
-};
-
 /**
  * It takes a string, tries to parse it, and if it fails, it returns the stringified version
  * of the input
@@ -3624,9 +3632,6 @@ const defaults = {
     }
     const isFormData = _utils.default.isFormData(data);
     if (isFormData) {
-      if (!hasJSONContentType) {
-        return data;
-      }
       return hasJSONContentType ? JSON.stringify((0, _formDataToJSON.default)(data)) : data;
     }
     if (_utils.default.isArrayBuffer(data) || _utils.default.isBuffer(data) || _utils.default.isStream(data) || _utils.default.isFile(data) || _utils.default.isBlob(data)) {
@@ -3695,15 +3700,13 @@ const defaults = {
   },
   headers: {
     common: {
-      'Accept': 'application/json, text/plain, */*'
+      'Accept': 'application/json, text/plain, */*',
+      'Content-Type': undefined
     }
   }
 };
-_utils.default.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+_utils.default.forEach(['delete', 'get', 'head', 'post', 'put', 'patch'], method => {
   defaults.headers[method] = {};
-});
-_utils.default.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
-  defaults.headers[method] = _utils.default.merge(DEFAULT_CONTENT_TYPE);
 });
 var _default = exports.default = defaults;
 },{"../utils.js":"node_modules/axios/lib/utils.js","../core/AxiosError.js":"node_modules/axios/lib/core/AxiosError.js","./transitional.js":"node_modules/axios/lib/defaults/transitional.js","../helpers/toFormData.js":"node_modules/axios/lib/helpers/toFormData.js","../helpers/toURLEncodedForm.js":"node_modules/axios/lib/helpers/toURLEncodedForm.js","../platform/index.js":"node_modules/axios/lib/platform/index.js","../helpers/formDataToJSON.js":"node_modules/axios/lib/helpers/formDataToJSON.js"}],"node_modules/axios/lib/helpers/parseHeaders.js":[function(require,module,exports) {
@@ -3972,7 +3975,19 @@ class AxiosHeaders {
   }
 }
 AxiosHeaders.accessor(['Content-Type', 'Content-Length', 'Accept', 'Accept-Encoding', 'User-Agent', 'Authorization']);
-_utils.default.freezeMethods(AxiosHeaders.prototype);
+
+// reserved names hotfix
+_utils.default.reduceDescriptors(AxiosHeaders.prototype, ({
+  value
+}, key) => {
+  let mapped = key[0].toUpperCase() + key.slice(1); // map `set` => `Set`
+  return {
+    get: () => value,
+    set(headerValue) {
+      this[mapped] = headerValue;
+    }
+  };
+});
 _utils.default.freezeMethods(AxiosHeaders);
 var _default = exports.default = AxiosHeaders;
 },{"../utils.js":"node_modules/axios/lib/utils.js","../helpers/parseHeaders.js":"node_modules/axios/lib/helpers/parseHeaders.js"}],"node_modules/axios/lib/core/transformData.js":[function(require,module,exports) {
@@ -4070,7 +4085,7 @@ function settle(resolve, reject, response) {
   }
 }
 },{"./AxiosError.js":"node_modules/axios/lib/core/AxiosError.js"}],"node_modules/axios/lib/helpers/cookies.js":[function(require,module,exports) {
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -4079,46 +4094,33 @@ exports.default = void 0;
 var _utils = _interopRequireDefault(require("./../utils.js"));
 var _index = _interopRequireDefault(require("../platform/index.js"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-var _default = exports.default = _index.default.isStandardBrowserEnv ?
+var _default = exports.default = _index.default.hasStandardBrowserEnv ?
 // Standard browser envs support document.cookie
-function standardBrowserEnv() {
-  return {
-    write: function write(name, value, expires, path, domain, secure) {
-      const cookie = [];
-      cookie.push(name + '=' + encodeURIComponent(value));
-      if (_utils.default.isNumber(expires)) {
-        cookie.push('expires=' + new Date(expires).toGMTString());
-      }
-      if (_utils.default.isString(path)) {
-        cookie.push('path=' + path);
-      }
-      if (_utils.default.isString(domain)) {
-        cookie.push('domain=' + domain);
-      }
-      if (secure === true) {
-        cookie.push('secure');
-      }
-      document.cookie = cookie.join('; ');
-    },
-    read: function read(name) {
-      const match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
-      return match ? decodeURIComponent(match[3]) : null;
-    },
-    remove: function remove(name) {
-      this.write(name, '', Date.now() - 86400000);
-    }
-  };
-}() :
-// Non standard browser env (web workers, react-native) lack needed support.
-function nonStandardBrowserEnv() {
-  return {
-    write: function write() {},
-    read: function read() {
-      return null;
-    },
-    remove: function remove() {}
-  };
-}();
+{
+  write(name, value, expires, path, domain, secure) {
+    const cookie = [name + '=' + encodeURIComponent(value)];
+    _utils.default.isNumber(expires) && cookie.push('expires=' + new Date(expires).toGMTString());
+    _utils.default.isString(path) && cookie.push('path=' + path);
+    _utils.default.isString(domain) && cookie.push('domain=' + domain);
+    secure === true && cookie.push('secure');
+    document.cookie = cookie.join('; ');
+  },
+  read(name) {
+    const match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+    return match ? decodeURIComponent(match[3]) : null;
+  },
+  remove(name) {
+    this.write(name, '', Date.now() - 86400000);
+  }
+} :
+// Non-standard browser env (web workers, react-native) lack needed support.
+{
+  write() {},
+  read() {
+    return null;
+  },
+  remove() {}
+};
 },{"./../utils.js":"node_modules/axios/lib/utils.js","../platform/index.js":"node_modules/axios/lib/platform/index.js"}],"node_modules/axios/lib/helpers/isAbsoluteURL.js":[function(require,module,exports) {
 'use strict';
 
@@ -4155,7 +4157,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = combineURLs;
 function combineURLs(baseURL, relativeURL) {
-  return relativeURL ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '') : baseURL;
+  return relativeURL ? baseURL.replace(/\/?\/$/, '') + '/' + relativeURL.replace(/^\/+/, '') : baseURL;
 }
 },{}],"node_modules/axios/lib/core/buildFullPath.js":[function(require,module,exports) {
 'use strict';
@@ -4193,7 +4195,7 @@ exports.default = void 0;
 var _utils = _interopRequireDefault(require("./../utils.js"));
 var _index = _interopRequireDefault(require("../platform/index.js"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-var _default = exports.default = _index.default.isStandardBrowserEnv ?
+var _default = exports.default = _index.default.hasStandardBrowserEnv ?
 // Standard browser envs have full support of the APIs needed to test
 // whether the request URL is of the same origin as current location.
 function standardBrowserEnv() {
@@ -4202,7 +4204,7 @@ function standardBrowserEnv() {
   let originURL;
 
   /**
-  * Parse a URL to discover it's components
+  * Parse a URL to discover its components
   *
   * @param {String} url The URL to be parsed
   * @returns {Object}
@@ -4354,7 +4356,10 @@ var _default = exports.default = isXHRAdapterSupported && function (config) {
   return new Promise(function dispatchXhrRequest(resolve, reject) {
     let requestData = config.data;
     const requestHeaders = _AxiosHeaders.default.from(config.headers).normalize();
-    const responseType = config.responseType;
+    let {
+      responseType,
+      withXSRFToken
+    } = config;
     let onCanceled;
     function done() {
       if (config.cancelToken) {
@@ -4364,8 +4369,15 @@ var _default = exports.default = isXHRAdapterSupported && function (config) {
         config.signal.removeEventListener('abort', onCanceled);
       }
     }
-    if (_utils.default.isFormData(requestData) && (_index.default.isStandardBrowserEnv || _index.default.isStandardBrowserWebWorkerEnv)) {
-      requestHeaders.setContentType(false); // Let the browser set it
+    let contentType;
+    if (_utils.default.isFormData(requestData)) {
+      if (_index.default.hasStandardBrowserEnv || _index.default.hasStandardBrowserWebWorkerEnv) {
+        requestHeaders.setContentType(false); // Let the browser set it
+      } else if ((contentType = requestHeaders.getContentType()) !== false) {
+        // fix semicolon duplication issue for ReactNative FormData implementation
+        const [type, ...tokens] = contentType ? contentType.split(';').map(token => token.trim()).filter(Boolean) : [];
+        requestHeaders.setContentType([type || 'multipart/form-data', ...tokens].join('; '));
+      }
     }
     let request = new XMLHttpRequest();
 
@@ -4466,11 +4478,14 @@ var _default = exports.default = isXHRAdapterSupported && function (config) {
     // Add xsrf header
     // This is only done if running in a standard browser environment.
     // Specifically not if we're in a web worker, or react-native.
-    if (_index.default.isStandardBrowserEnv) {
-      // Add xsrf header
-      const xsrfValue = (config.withCredentials || (0, _isURLSameOrigin.default)(fullPath)) && config.xsrfCookieName && _cookies.default.read(config.xsrfCookieName);
-      if (xsrfValue) {
-        requestHeaders.set(config.xsrfHeaderName, xsrfValue);
+    if (_index.default.hasStandardBrowserEnv) {
+      withXSRFToken && _utils.default.isFunction(withXSRFToken) && (withXSRFToken = withXSRFToken(config));
+      if (withXSRFToken || withXSRFToken !== false && (0, _isURLSameOrigin.default)(fullPath)) {
+        // Add xsrf header
+        const xsrfValue = config.xsrfHeaderName && config.xsrfCookieName && _cookies.default.read(config.xsrfCookieName);
+        if (xsrfValue) {
+          requestHeaders.set(config.xsrfHeaderName, xsrfValue);
+        }
       }
     }
 
@@ -4559,6 +4574,8 @@ _utils.default.forEach(knownAdapters, (fn, value) => {
     });
   }
 });
+const renderReason = reason => `- ${reason}`;
+const isResolvedHandle = adapter => _utils.default.isFunction(adapter) || adapter === null || adapter === false;
 var _default = exports.default = {
   getAdapter: adapters => {
     adapters = _utils.default.isArray(adapters) ? adapters : [adapters];
@@ -4567,20 +4584,26 @@ var _default = exports.default = {
     } = adapters;
     let nameOrAdapter;
     let adapter;
+    const rejectedReasons = {};
     for (let i = 0; i < length; i++) {
       nameOrAdapter = adapters[i];
-      if (adapter = _utils.default.isString(nameOrAdapter) ? knownAdapters[nameOrAdapter.toLowerCase()] : nameOrAdapter) {
+      let id;
+      adapter = nameOrAdapter;
+      if (!isResolvedHandle(nameOrAdapter)) {
+        adapter = knownAdapters[(id = String(nameOrAdapter)).toLowerCase()];
+        if (adapter === undefined) {
+          throw new _AxiosError.default(`Unknown adapter '${id}'`);
+        }
+      }
+      if (adapter) {
         break;
       }
+      rejectedReasons[id || '#' + i] = adapter;
     }
     if (!adapter) {
-      if (adapter === false) {
-        throw new _AxiosError.default(`Adapter ${nameOrAdapter} is not supported by the environment`, 'ERR_NOT_SUPPORT');
-      }
-      throw new Error(_utils.default.hasOwnProp(knownAdapters, nameOrAdapter) ? `Adapter '${nameOrAdapter}' is not available in the build` : `Unknown adapter '${nameOrAdapter}'`);
-    }
-    if (!_utils.default.isFunction(adapter)) {
-      throw new TypeError('adapter is not a function');
+      const reasons = Object.entries(rejectedReasons).map(([id, state]) => `adapter ${id} ` + (state === false ? 'is not supported by the environment' : 'is not available in the build'));
+      let s = length ? reasons.length > 1 ? 'since :\n' + reasons.map(renderReason).join('\n') : ' ' + renderReason(reasons[0]) : 'as no adapter specified';
+      throw new _AxiosError.default(`There is no suitable adapter to dispatch the request ` + s, 'ERR_NOT_SUPPORT');
     }
     return adapter;
   },
@@ -4663,7 +4686,9 @@ exports.default = mergeConfig;
 var _utils = _interopRequireDefault(require("../utils.js"));
 var _AxiosHeaders = _interopRequireDefault(require("./AxiosHeaders.js"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-const headersToObject = thing => thing instanceof _AxiosHeaders.default ? thing.toJSON() : thing;
+const headersToObject = thing => thing instanceof _AxiosHeaders.default ? {
+  ...thing
+} : thing;
 
 /**
  * Config-specific merge-function which creates a new config-object
@@ -4735,6 +4760,7 @@ function mergeConfig(config1, config2) {
     timeout: defaultToConfig2,
     timeoutMessage: defaultToConfig2,
     withCredentials: defaultToConfig2,
+    withXSRFToken: defaultToConfig2,
     adapter: defaultToConfig2,
     responseType: defaultToConfig2,
     xsrfCookieName: defaultToConfig2,
@@ -4754,7 +4780,7 @@ function mergeConfig(config1, config2) {
     validateStatus: mergeDirectKeys,
     headers: (a, b) => mergeDeepProperties(headersToObject(a), headersToObject(b), true)
   };
-  _utils.default.forEach(Object.keys(config1).concat(Object.keys(config2)), function computeConfigValue(prop) {
+  _utils.default.forEach(Object.keys(Object.assign({}, config1, config2)), function computeConfigValue(prop) {
     const merge = mergeMap[prop] || mergeDeepProperties;
     const configValue = merge(config1[prop], config2[prop], prop);
     _utils.default.isUndefined(configValue) && merge !== mergeDirectKeys || (config[prop] = configValue);
@@ -4768,7 +4794,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.VERSION = void 0;
-const VERSION = exports.VERSION = "1.3.6";
+const VERSION = exports.VERSION = "1.6.8";
 },{}],"node_modules/axios/lib/helpers/validator.js":[function(require,module,exports) {
 'use strict';
 
@@ -4895,7 +4921,27 @@ class Axios {
    *
    * @returns {Promise} The Promise to be fulfilled
    */
-  request(configOrUrl, config) {
+  async request(configOrUrl, config) {
+    try {
+      return await this._request(configOrUrl, config);
+    } catch (err) {
+      if (err instanceof Error) {
+        let dummy;
+        Error.captureStackTrace ? Error.captureStackTrace(dummy = {}) : dummy = new Error();
+
+        // slice off the Error: ... line
+        const stack = dummy.stack ? dummy.stack.replace(/^.+\n/, '') : '';
+        if (!err.stack) {
+          err.stack = stack;
+          // match without the 2 top stack lines
+        } else if (stack && !String(err.stack).endsWith(stack.replace(/^.+\n.+\n/, ''))) {
+          err.stack += '\n' + stack;
+        }
+      }
+      throw err;
+    }
+  }
+  _request(configOrUrl, config) {
     /*eslint no-param-reassign:0*/
     // Allow for axios('example/url'[, config]) a la fetch API
     if (typeof configOrUrl === 'string') {
@@ -4932,11 +4978,10 @@ class Axios {
 
     // Set config.method
     config.method = (config.method || this.defaults.method || 'get').toLowerCase();
-    let contextHeaders;
 
     // Flatten headers
-    contextHeaders = headers && _utils.default.merge(headers.common, headers[config.method]);
-    contextHeaders && _utils.default.forEach(['delete', 'get', 'head', 'post', 'put', 'patch', 'common'], method => {
+    let contextHeaders = headers && _utils.default.merge(headers.common, headers[config.method]);
+    headers && _utils.default.forEach(['delete', 'get', 'head', 'post', 'put', 'patch', 'common'], method => {
       delete headers[method];
     });
     config.headers = _AxiosHeaders.default.concat(contextHeaders, headers);
@@ -5296,6 +5341,7 @@ var _AxiosError = _interopRequireDefault(require("./core/AxiosError.js"));
 var _spread = _interopRequireDefault(require("./helpers/spread.js"));
 var _isAxiosError = _interopRequireDefault(require("./helpers/isAxiosError.js"));
 var _AxiosHeaders = _interopRequireDefault(require("./core/AxiosHeaders.js"));
+var _adapters = _interopRequireDefault(require("./adapters/adapters.js"));
 var _HttpStatusCode = _interopRequireDefault(require("./helpers/HttpStatusCode.js"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 /**
@@ -5358,12 +5404,13 @@ axios.isAxiosError = _isAxiosError.default;
 axios.mergeConfig = _mergeConfig.default;
 axios.AxiosHeaders = _AxiosHeaders.default;
 axios.formToJSON = thing => (0, _formDataToJSON.default)(_utils.default.isHTMLForm(thing) ? new FormData(thing) : thing);
+axios.getAdapter = _adapters.default.getAdapter;
 axios.HttpStatusCode = _HttpStatusCode.default;
 axios.default = axios;
 
 // this module should only have a default export
 var _default = exports.default = axios;
-},{"./utils.js":"node_modules/axios/lib/utils.js","./helpers/bind.js":"node_modules/axios/lib/helpers/bind.js","./core/Axios.js":"node_modules/axios/lib/core/Axios.js","./core/mergeConfig.js":"node_modules/axios/lib/core/mergeConfig.js","./defaults/index.js":"node_modules/axios/lib/defaults/index.js","./helpers/formDataToJSON.js":"node_modules/axios/lib/helpers/formDataToJSON.js","./cancel/CanceledError.js":"node_modules/axios/lib/cancel/CanceledError.js","./cancel/CancelToken.js":"node_modules/axios/lib/cancel/CancelToken.js","./cancel/isCancel.js":"node_modules/axios/lib/cancel/isCancel.js","./env/data.js":"node_modules/axios/lib/env/data.js","./helpers/toFormData.js":"node_modules/axios/lib/helpers/toFormData.js","./core/AxiosError.js":"node_modules/axios/lib/core/AxiosError.js","./helpers/spread.js":"node_modules/axios/lib/helpers/spread.js","./helpers/isAxiosError.js":"node_modules/axios/lib/helpers/isAxiosError.js","./core/AxiosHeaders.js":"node_modules/axios/lib/core/AxiosHeaders.js","./helpers/HttpStatusCode.js":"node_modules/axios/lib/helpers/HttpStatusCode.js"}],"node_modules/axios/index.js":[function(require,module,exports) {
+},{"./utils.js":"node_modules/axios/lib/utils.js","./helpers/bind.js":"node_modules/axios/lib/helpers/bind.js","./core/Axios.js":"node_modules/axios/lib/core/Axios.js","./core/mergeConfig.js":"node_modules/axios/lib/core/mergeConfig.js","./defaults/index.js":"node_modules/axios/lib/defaults/index.js","./helpers/formDataToJSON.js":"node_modules/axios/lib/helpers/formDataToJSON.js","./cancel/CanceledError.js":"node_modules/axios/lib/cancel/CanceledError.js","./cancel/CancelToken.js":"node_modules/axios/lib/cancel/CancelToken.js","./cancel/isCancel.js":"node_modules/axios/lib/cancel/isCancel.js","./env/data.js":"node_modules/axios/lib/env/data.js","./helpers/toFormData.js":"node_modules/axios/lib/helpers/toFormData.js","./core/AxiosError.js":"node_modules/axios/lib/core/AxiosError.js","./helpers/spread.js":"node_modules/axios/lib/helpers/spread.js","./helpers/isAxiosError.js":"node_modules/axios/lib/helpers/isAxiosError.js","./core/AxiosHeaders.js":"node_modules/axios/lib/core/AxiosHeaders.js","./adapters/adapters.js":"node_modules/axios/lib/adapters/adapters.js","./helpers/HttpStatusCode.js":"node_modules/axios/lib/helpers/HttpStatusCode.js"}],"node_modules/axios/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5376,7 +5423,7 @@ Object.defineProperty(exports, "default", {
     return _axios.default;
   }
 });
-exports.toFormData = exports.spread = exports.mergeConfig = exports.isCancel = exports.isAxiosError = exports.formToJSON = void 0;
+exports.toFormData = exports.spread = exports.mergeConfig = exports.isCancel = exports.isAxiosError = exports.getAdapter = exports.formToJSON = void 0;
 var _axios = _interopRequireDefault(require("./lib/axios.js"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 // This module is intended to unwrap Axios default export as named.
@@ -5397,9 +5444,11 @@ const {
   AxiosHeaders,
   HttpStatusCode,
   formToJSON,
+  getAdapter,
   mergeConfig
 } = _axios.default;
 exports.mergeConfig = mergeConfig;
+exports.getAdapter = getAdapter;
 exports.formToJSON = formToJSON;
 exports.HttpStatusCode = HttpStatusCode;
 exports.AxiosHeaders = AxiosHeaders;
@@ -5454,11 +5503,12 @@ Object.defineProperty(exports, "__esModule", {
 exports.Attributes = void 0;
 var Attributes = /** @class */function () {
   function Attributes(data) {
+    var _this = this;
     this.data = data;
+    this.get = function (key) {
+      return _this.data[key];
+    };
   }
-  Attributes.prototype.get = function (key) {
-    return this.data[key];
-  };
   Attributes.prototype.set = function (update) {
     Object.assign(this.data, update);
   };
@@ -5517,9 +5567,11 @@ var user = new User_1.User({
   name: "new record",
   age: 0
 });
+console.log(user.get("name"));
 user.on("change", function () {
-  console.log("user was changed");
+  console.log("User was changed");
 });
+user.trigger("change");
 },{"./models/User":"src/models/User.ts"}],"../../../.nodebrew/node/v20.10.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
