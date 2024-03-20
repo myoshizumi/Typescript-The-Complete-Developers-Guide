@@ -5482,6 +5482,27 @@ var User = /** @class */function () {
     this.sync = new Sync_1.Sync(rootUrl);
     this.attributes = new Attributes_1.Attributes(attrs);
   }
+  Object.defineProperty(User.prototype, "on", {
+    get: function get() {
+      return this.events.on;
+    },
+    enumerable: false,
+    configurable: true
+  });
+  Object.defineProperty(User.prototype, "trigger", {
+    get: function get() {
+      return this.events.trigger;
+    },
+    enumerable: false,
+    configurable: true
+  });
+  Object.defineProperty(User.prototype, "get", {
+    get: function get() {
+      return this.attributes.get;
+    },
+    enumerable: false,
+    configurable: true
+  });
   return User;
 }();
 exports.User = User;
@@ -5496,23 +5517,9 @@ var user = new User_1.User({
   name: "new record",
   age: 0
 });
-// A quick reminder on accessors
-var Person = /** @class */function () {
-  function Person(firstName, lastName) {
-    this.firstName = firstName;
-    this.lastName = lastName;
-  }
-  Object.defineProperty(Person.prototype, "fullName", {
-    get: function get() {
-      return "".concat(this.firstName, " ").concat(this.lastName);
-    },
-    enumerable: false,
-    configurable: true
-  });
-  return Person;
-}();
-var person = new Person("firstName", "lastName");
-console.log(person.fullName);
+user.on("change", function () {
+  console.log("user was changed");
+});
 },{"./models/User":"src/models/User.ts"}],"../../../.nodebrew/node/v20.10.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -5538,7 +5545,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55275" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59718" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
