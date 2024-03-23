@@ -1,16 +1,18 @@
 {
-	"dependencies": {
-		"axios": "^1.6.0",
-		"json-server": "^0.17.3"
-	},
+	"name": "stephengridercourse",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
 	"scripts": {
-		"start:db": "json-server -w db.json",
-		"start:parcel": "npx parcel index.html"
+		"start:build": "tsc -w",
+		"start:run": "nodemon build/index.js",
+		"start": "concurrently npm:start:*"
 	},
-	"devDependencies": {
-		"typescript": "^5.4.2"
-	},
-	"overrides": {
-		"semver": "^7.5.3"
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"concurrently": "^8.2.2",
+		"nodemon": "^3.1.0"
 	}
 }
