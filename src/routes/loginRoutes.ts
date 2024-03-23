@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, request } from "express";
 
 interface RequestWithBody extends Request {
 	body: { [key: string]: string | undefined };
@@ -25,7 +25,7 @@ router.get("/login", (req: Request, res: Response) => {
 router.post("/login", (req: RequestWithBody, res: Response) => {
 	const { email, password } = req.body;
 
-    if (
+	if (
 		email &&
 		password &&
 		email === "test@example.com" &&
@@ -55,4 +55,10 @@ router.get("/", (req: Request, res: Response) => {
         `);
 	}
 });
+
+router.get("/logout", (req: Request, res: Response) => {
+	req.session = undefined;
+	res.redirect("/");
+});
+
 export { router };
