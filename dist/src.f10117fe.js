@@ -141,9 +141,15 @@ var View = /*#__PURE__*/function () {
     _classCallCheck(this, View);
     this.parent = parent;
     this.model = model;
+    this.regions = {};
     this.bindModel();
   }
   _createClass(View, [{
+    key: "regionsMap",
+    value: function regionsMap() {
+      return {};
+    }
+  }, {
     key: "eventsMap",
     value: function eventsMap() {
       return {};
@@ -174,12 +180,25 @@ var View = /*#__PURE__*/function () {
       }
     }
   }, {
+    key: "mapResions",
+    value: function mapResions(fragment) {
+      var regionsMap = this.regionsMap();
+      for (var key in regionsMap) {
+        var selector = regionsMap[key];
+        var element = fragment.querySelector(selector);
+        if (element) {
+          this.regions[key] = element;
+        }
+      }
+    }
+  }, {
     key: "render",
     value: function render() {
       this.parent.innerHTML = "";
       var templateElement = document.createElement("template");
       templateElement.innerHTML = this.template();
       this.bindEvents(templateElement.content);
+      this.mapResions(templateElement.content);
       this.parent.appendChild(templateElement.content);
     }
   }]);
