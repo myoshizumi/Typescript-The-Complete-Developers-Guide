@@ -16,16 +16,25 @@ class Boat {
         return `This boats color is ${this.color}`;
     }
     pilot() {
+        throw new Error();
         console.log("swish");
     }
 }
 __decorate([
-    testDecorator,
+    logError,
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], Boat.prototype, "pilot", null);
-function testDecorator(target, key) {
-    console.log("Target:", target);
-    console.log("Key:", key);
+function logError(target, key, desc) {
+    const method = desc.value;
+    desc.value = function () {
+        try {
+            method();
+        }
+        catch (e) {
+            console.log("Oops! Something went wrong");
+        }
+    };
 }
+new Boat().pilot();
