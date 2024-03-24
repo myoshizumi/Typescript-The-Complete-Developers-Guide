@@ -21,20 +21,28 @@ class Boat {
     }
 }
 __decorate([
-    logError,
+    testDecorator,
+    __metadata("design:type", String)
+], Boat.prototype, "color", void 0);
+__decorate([
+    logError("Oops! Something went bad!"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], Boat.prototype, "pilot", null);
-function logError(target, key, desc) {
-    const method = desc.value;
-    desc.value = function () {
-        try {
-            method();
-        }
-        catch (e) {
-            console.log("Oops! Something went wrong");
-        }
+function testDecorator(target, key) {
+    console.log(target.color);
+}
+function logError(errorMessage) {
+    return function (target, key, desc) {
+        const method = desc.value;
+        desc.value = function () {
+            try {
+                method();
+            }
+            catch (e) {
+                console.log(errorMessage);
+            }
+        };
     };
 }
-new Boat().pilot();
