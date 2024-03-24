@@ -9,35 +9,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-require("reflect-metadata");
-var loginRoutes_1 = require("./routes/loginRoutes");
-var Plane = /** @class */ (function () {
-    function Plane() {
-        this.color = "red";
+var LoginController = /** @class */ (function () {
+    function LoginController() {
     }
-    Plane.prototype.fly = function () {
-        console.log("vrrrrrrrrr");
+    LoginController.prototype.getLogin = function (req, res) {
+        res.send(/*html*/ "\n        <form method=\"POST\">\n            <div>\n                <label>Email</label>\n                <input name=\"email\" />\n            </div>\n            <div>\n                <label>Password</label>\n                <input name=\"password\" type=\"password\" />\n            </div>\n            <button>Submit</button>\n        </form>\n    ");
     };
     __decorate([
         get("/login"),
         __metadata("design:type", Function),
-        __metadata("design:paramtypes", []),
+        __metadata("design:paramtypes", [Object, Object]),
         __metadata("design:returntype", void 0)
-    ], Plane.prototype, "fly", null);
-    Plane = __decorate([
-        controller
-    ], Plane);
-    return Plane;
+    ], LoginController.prototype, "getLogin", null);
+    LoginController = __decorate([
+        controller("/")
+    ], LoginController);
+    return LoginController;
 }());
-function get(path) {
-    return function (target, key) {
-        Reflect.defineMetadata("path", path, target, key);
-    };
-}
-function controller(target) {
-    for (var key in target.prototype) {
-        var path = Reflect.getMetadata("path", target.prototype, key);
-        var middleware = Reflect.getMetadata("middleware", target.prototype, key);
-        loginRoutes_1.router.get(path, middleware, target.prototype[key]);
-    }
-}
