@@ -8,30 +8,53 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-class Boat {
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+let Boat = class Boat {
     constructor() {
         this.color = "red";
     }
     get formattedColor() {
         return `This boats color is ${this.color}`;
     }
-    pilot() {
-        throw new Error();
-        console.log("swish");
+    pilot(speed, generateWake) {
+        if (speed === "fast") {
+            console.log("swish");
+        }
+        else {
+            console.log("nothing");
+        }
     }
-}
+};
 __decorate([
     testDecorator,
     __metadata("design:type", String)
 ], Boat.prototype, "color", void 0);
 __decorate([
+    testDecorator,
+    __metadata("design:type", String),
+    __metadata("design:paramtypes", [])
+], Boat.prototype, "formattedColor", null);
+__decorate([
     logError("Oops! Something went bad!"),
+    __param(0, parameterDecorator),
+    __param(1, parameterDecorator),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String, Boolean]),
     __metadata("design:returntype", void 0)
 ], Boat.prototype, "pilot", null);
+Boat = __decorate([
+    classDecorator
+], Boat);
+function classDecorator(constructor) {
+    console.log(constructor);
+}
+function parameterDecorator(target, key, index) {
+    console.log(key, index);
+}
 function testDecorator(target, key) {
-    console.log(target.color);
+    console.log(key);
 }
 function logError(errorMessage) {
     return function (target, key, desc) {
