@@ -1,5 +1,5 @@
-import "reflect-metadata";
 import { RequestHandler } from "express";
+import "reflect-metadata";
 import { MetadataKeys } from "./MetadataKeys";
 
 export function use(middleware: RequestHandler) {

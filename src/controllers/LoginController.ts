@@ -1,13 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { get, controller, bodyValidator, post } from "./decorators";
-// function logger(req: Request, res: Response, next: NextFunction) {
-// 	console.log("Request was made!!");
-// 	next();
-// }
 @controller("/auth")
 class LoginController {
 	@get("/login")
-	// @use(logger)
 	getLogin(req: Request, res: Response): void {
 		res.send(/*html*/ `
         <form method="POST">
@@ -40,13 +35,11 @@ class LoginController {
 		} else {
 			res.send("Invalid email or password");
 		}
-    }
-    
-    @get('/logout')
-    getLogout(req: Request, res: Response){
-	req.session = undefined;
-	res.redirect("/");
-}
+	}
 
-
+	@get("/logout")
+	getLogout(req: Request, res: Response) {
+		req.session = undefined;
+		res.redirect("/");
+	}
 }
